@@ -1,0 +1,32 @@
+{
+  "name": "gen-pug-source-map",
+  "version": "v0.1.0",
+  "description": "Source map generation for Pug v2.x (aka Jade)",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test/run.js"
+  },
+  "engines": {
+    "node": ">=0.12"
+  },
+  "keywords": [
+    "source map",
+    "sourcemaps",
+    "javascript",
+    "jade",
+    "pug"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aMarCruz/gen-pug-source-map.git"
+  },
+  "author": "aMarCruz <amarcruzbox-git@yahoo.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/aMarCruz/gen-pug-source-map/issues"
+  },
+  "homepage": "https://github.com/aMarCruz/gen-pug-source-map",
+  "dependencies": {
+    "source-map": "^0.5.6"
+  }
+}
