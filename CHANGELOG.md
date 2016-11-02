@@ -9,6 +9,7 @@ Complete rewrite, many fixes, almost ready for production
 - Fix: reading source files multiple times, now source is extracted from the compiled code.
 - Fix: sometimes the line number is shifted by one.
 - Better code cleanup, removal of empty lines.
+- Basic but complete test.
 
 ### 2016-10-32 v0.1.0
 
