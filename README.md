@@ -85,5 +85,5 @@ See the [CHANGELOG](https://github.com/aMarCruz/gen-pug-source-map/blob/master/C
 
 [build-image]:    https://img.shields.io/travis/aMarCruz/gen-pug-source-map.svg
 [build-url]:      https://travis-ci.org/aMarCruz/gen-pug-source-map
-[w-build-image]:  https://ci.appveyor.com/api/projects/status/9tvs61pk0qpi09rr/branch/master?svg=true
-[w-build-url]:    https://ci.appveyor.com/project/aMarCruz/rollup-plugin-jscc/branch/master
+[w-build-image]:  https://ci.appveyor.com/api/projects/status/2x4765y5780hdti6/branch/master?svg=true
+[w-build-url]:    https://ci.appveyor.com/project/aMarCruz/gen-pug-source-map/branch/master
