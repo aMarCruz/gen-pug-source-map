@@ -40,5 +40,6 @@ jspm_packages
 .vscode
 jsconfig.json
 
-# map files
+# map and test files
 dist/*.map
+test/output

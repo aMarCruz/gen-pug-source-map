@@ -1,16 +1,77 @@
 /* eslint-disable */
 
 const genSourceMap = require('../')
-const assert = require('assert')
+const _pug    = require('pug')
+const assert  = require('assert')
+const path    = require('path')
+const fs      = require('fs')
 
-const output =
-  'function template(locals) {var pug_html = "", pug_mixins = {}, pug_interp;var pug_debug_filename, pug_debug_line;' +
-  'try {var pug_debug_sources = {"app\u002Fmodules\u002Forders\u002Fviews\u002Finc\u002Fdetail-comments.pug":"undefined"};\n' +
-  ';pug_debug_line = 1;pug_debug_filename = "app\u002Fmodules\u002Forders\u002Fviews\u002Finc\u002Fdetail-comments.pug";\n' +
-  'pug_html = pug_html + "\u003Cundefined\u003E\u003C\u002Fundefined\u003E";} catch (err) ' +
-  '{pug.rethrow(err, pug_debug_filename, pug_debug_line, pug_debug_sources[pug_debug_filename]);};return pug_html;};'
+process.chdir(__dirname)
 
-const result = genSourceMap('app/modules/orders/views/inc/detail-comments.pug', output, '')
+test2()
 
-assert(typeof result.data == 'string')
-assert(typeof result.map  == 'string')
+function createDir (path) {
+  try {
+    fs.mkdirSync(path)
+  } catch (err) {
+    if (err.code !== 'EEXIST') {
+      throw err
+    }
+  }
+}
+
+function test2 () {
+  const base = path.resolve(__dirname, 'fixtures/simple-include')
+  const file = path.join(base, 'layout.pug')
+
+  createDir('output')
+
+  const code = _pug.compileFileClient(file, {
+    doctype: 'html',
+    basedir: 'fixtures/simple-include', // base,
+    compileDebug: true,
+    inlineRuntimeFunctions: false,
+    pretty: true
+  })
+
+  fs.writeFileSync('output/app1-source.js', code, 'utf8')
+
+  const packet = genSourceMap(file, null, code)
+
+  assert(typeof packet.data == 'string')
+  assert(typeof packet.map  == 'string')
+
+  const map1 = require('./expected.json')
+  const map2 = JSON.parse(packet.map)
+  const errs = []
+
+  Object.keys(map1).forEach(function (k) {
+    assert(String(map1[k]) === String(map2[k]),
+      'source map mismatch in property "' + k + '"\n' +
+      'expected "' + map2[k] + '"\n' +
+      '   to be "' + map1[k] + '"\n'
+    )
+  })
+
+  const output = packet.data
+      .replace(' template(locals) {', ' template(locals,pug){') +
+      '\n;module.exports=template;' +
+      '\n//# sourceMappingURL=app1.js.map\n'
+
+  fs.writeFileSync('output/app1.js', output, 'utf8')
+  fs.writeFileSync('output/app1.js.map', packet.map, 'utf8')
+
+  const fn = require('./output/app1.js')
+  const html = fn(
+    {
+      items: [
+        { name: 'Item one' },
+        { name: 'Item two' },
+        { name: 'Item tree' },
+        { name: 'Item four' },
+        { name: 'Item five' }
+      ]
+    }, _pug.runtime)
+
+  fs.writeFileSync('output/index.html', html, 'utf8')
+}
