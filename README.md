@@ -1,4 +1,6 @@
-[![npm Version][npm-image]][npm-url]
+[![Windows build][w-build-image]][w-build-url]
+[![Build status][build-image]][build-url]
+[![npm version][npm-image]][npm-url]
 [![License][license-image]][license-url]
 
 # gen-pug-source-map
@@ -80,3 +82,8 @@ See the [CHANGELOG](https://github.com/aMarCruz/gen-pug-source-map/blob/master/C
 [npm-url]:        https://www.npmjs.com/package/gen-pug-source-map
 [license-image]:  https://img.shields.io/npm/l/express.svg
 [license-url]:    https://github.com/aMarCruz/gen-pug-source-map/blob/master/LICENSE
+
+[build-image]:    https://img.shields.io/travis/aMarCruz/gen-pug-source-map.svg
+[build-url]:      https://travis-ci.org/aMarCruz/gen-pug-source-map
+[w-build-image]:  https://ci.appveyor.com/api/projects/status/9tvs61pk0qpi09rr/branch/master?svg=true
+[w-build-url]:    https://ci.appveyor.com/project/aMarCruz/rollup-plugin-jscc/branch/master
