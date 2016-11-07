@@ -97,9 +97,7 @@ function genPugSourceMap (filename, source, compiled, options) {
     if (originalLine <= 0) return
 
     // avoid normalize the path here to match the name in debugSources
-    var fname = match[2] && match[2]
-        .replace(/\\u002F/g, '/')
-        .replace(/\\u005C{2}/g, '\\').replace(/\\\\/g, '\\')
+    var fname = match[2] && match[2].replace(/\\u002F/g, '/').replace(/\\\\/g, '\\')
     if (!fname) fname = filename
 
     var matchedLines = matchedFiles[fname]

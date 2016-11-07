@@ -42,18 +42,11 @@ function test2 () {
   const result = packet.map
 
   // if you change the source please test the map and uncomment this once
-  fs.writeFileSync('./expected.json', JSON.stringify(result, null, 2), 'utf8')
+  //fs.writeFileSync('./expected.json', JSON.stringify(result, null, 2), 'utf8')
   const expected = require('./expected.json')
 
   Object.keys(expected).forEach(function (k) {
-
-    const isok = String(expected[k]) === String(result[k])
-    if (!isok) {
-      console.error('---')
-      console.error(JSON.stringify(result, null, 2))
-      console.error('---')
-    }
-    assert(isok,
+    assert(String(expected[k]) === String(result[k]),
       'source map mismatch in property "' + k + '"\n' +
       'expected "' + result[k] + '"\n' +
       '   to be "' + expected[k] + '"\n'
