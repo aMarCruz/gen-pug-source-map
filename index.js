@@ -24,7 +24,9 @@ function extractSources (compiledLines) {
       try {
         sources = JSON.parse(line.slice(pos - 1, -1))
         compiledLines[ix] = line.slice(0, pos) + '};'
-      } catch (_) {
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error(err + ' (extractSources)')
         sources = false
       }
       break

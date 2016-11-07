@@ -46,7 +46,14 @@ function test2 () {
   const expected = require('./expected.json')
 
   Object.keys(expected).forEach(function (k) {
-    assert(String(expected[k]) === String(result[k]),
+
+    const isok = String(expected[k]) === String(result[k])
+    if (!isok) {
+      console.error('---')
+      console.error(JSON.stringify(result, null, 2))
+      console.error('---')
+    }
+    assert(!isok,
       'source map mismatch in property "' + k + '"\n' +
       'expected "' + result[k] + '"\n' +
       '   to be "' + expected[k] + '"\n'
