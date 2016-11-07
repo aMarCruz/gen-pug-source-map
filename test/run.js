@@ -42,7 +42,7 @@ function test2 () {
   const result = packet.map
 
   // if you change the source please test the map and uncomment this once
-  //fs.writeFileSync('./expected.json', JSON.stringify(result, null, 2), 'utf8')
+  fs.writeFileSync('./expected.json', JSON.stringify(result, null, 2), 'utf8')
   const expected = require('./expected.json')
 
   Object.keys(expected).forEach(function (k) {
@@ -81,4 +81,5 @@ function test2 () {
     }, _pug.runtime)
 
   fs.writeFileSync('output/index.html', html, 'utf8')
+  console.log('Done.')
 }

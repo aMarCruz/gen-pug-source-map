@@ -63,7 +63,7 @@ function genPugSourceMap (filename, source, compiled, options) {
   filename = path.resolve(basedir, path.normalize(filename))
 
   var reLineAndPath = /;pug_debug_line = ([0-9]+);pug_debug_filename = "([^"]*)";/
-  var reEntryPoint  = /^function [$\w][^\s\(](locals){var pug_html\s*=/
+  var reEntryPoint  = /^function [$\w]+\(locals\)\{var pug_html\s*=/
   var compiledLines = compiled.split('\n')
   var debugSources  = extractSources(compiledLines)
   var matchedFiles  = {}
@@ -97,7 +97,9 @@ function genPugSourceMap (filename, source, compiled, options) {
     if (originalLine <= 0) return
 
     // avoid normalize the path here to match the name in debugSources
-    var fname = match[2] && match[2].replace(/\\u005C/g, '\\').replace(/\\u002F/g, '/')
+    var fname = match[2] && match[2]
+        .replace(/\\u002F/g, '/')
+        .replace(/\\u005C{2}/g, '\\').replace(/\\\\/g, '\\')
     if (!fname) fname = filename
 
     var matchedLines = matchedFiles[fname]
