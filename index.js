@@ -10,10 +10,9 @@ function relative (basedir, fname) {
 /*
   Pug give us the sources in `var pug_debug_sources = { ... };\n`
 */
-function extractSources (basedir, compiledLines) {
+function extractSources (compiledLines) {
   var debugSrc = 'var pug_debug_sources = {'
-  var sources  = {}
-  var srcFiles
+  var sources  = false
 
   for (var ix = 0; ix < compiledLines.length; ix++) {
     var line = compiledLines[ix]
@@ -23,20 +22,13 @@ function extractSources (basedir, compiledLines) {
     if (~pos) {
       pos += debugSrc.length
       try {
-        srcFiles = JSON.parse(line.slice(pos - 1, -1))
+        sources = JSON.parse(line.slice(pos - 1, -1))
         compiledLines[ix] = line.slice(0, pos) + '};'
       } catch (_) {
-        sources = {}
+        sources = false
       }
       break
     }
-  }
-
-  if (srcFiles) {
-    Object.keys(srcFiles).forEach(function (s) {
-      var fname = relative(basedir, s)
-      sources[fname] = srcFiles[s]
-    })
   }
 
   return sources
@@ -45,15 +37,15 @@ function extractSources (basedir, compiledLines) {
 /*
   Adds the given filename to sourcesContent, as relative to basedir
 */
-function addSourceContent (generator, fname, debugSources) {
+function addSourceContent (generator, basedir, fname, debugSources) {
   var source = debugSources[fname]
-  generator.setSourceContent(fname, source || (fname + ' not found.'))
+  generator.setSourceContent(relative(basedir, fname), source || null)
 }
 
 /*
   Generates the pair code / sourcemap
 */
-function genSourceMap (filename, source, compiled, options) {
+function genPugSourceMap (filename, source, compiled, options) {
 
   if (arguments.length < 3) {
     compiled = source
@@ -64,19 +56,34 @@ function genSourceMap (filename, source, compiled, options) {
 
   var opts = options || {}
   var basedir = opts.root
-  basedir  = basedir ? path.resolve(path.normalize(basedir)) : process.cwd()
-  filename = relative(basedir, filename)
 
-  var generator = new SourceMapGenerator({
-    file: filename + '.js'
-  })
+  basedir  = basedir ? path.resolve(path.normalize(basedir)) : process.cwd()
+  filename = path.resolve(basedir, path.normalize(filename))
 
   var reLineAndPath = /;pug_debug_line = ([0-9]+);pug_debug_filename = "([^"]*)";/
+  var reEntryPoint  = /^function [$\w][^\s\(](locals){var pug_html\s*=/
   var compiledLines = compiled.split('\n')
-  var debugSources  = extractSources(basedir, compiledLines)
-  var filesMatched  = {}
+  var debugSources  = extractSources(compiledLines)
+  var matchedFiles  = {}
   var lineCount = 0
   var lastLine = -1
+
+  if (!debugSources) {
+    throw new Error('Cannot get the source code. Please compile with compileDebug:true.')
+  }
+
+  var mapGenerator = new SourceMapGenerator({
+    file: relative(basedir, filename) + '.js'
+  })
+
+  // allow breakpoints in 1st line, better support is in To Do
+  if (reEntryPoint.test(compiledLines[0])) {
+    mapGenerator.addMapping({
+      generated: { line: 1, column: 0 },
+      original: { line: 1, column: 0 },
+      source: relative(basedir, filename)
+    })
+  }
 
   compiledLines.forEach(function (line, lineno) {
     lineCount++
@@ -87,8 +94,18 @@ function genSourceMap (filename, source, compiled, options) {
     var originalLine = ~~match[1]
     if (originalLine <= 0) return
 
-    var fname = match[2] && relative(basedir, match[2].replace(/\\u00(?:2F|5C)/g, '/'))
+    var fname = match[2] && match[2].replace(/\\u00(?:2F|5C)/g, '/')
     if (!fname) fname = filename
+
+    var matchedLines = matchedFiles[fname]
+    if (!matchedLines) {
+      // new include file - add source content
+      matchedFiles[fname] = matchedLines = []
+
+      if (!opts.excludeContent) {
+        addSourceContent(mapGenerator, basedir, fname, debugSources)
+      }
+    }
 
     // remove pug debug line from generated code, adjust line counter
     if (!opts.keepDebugLines) {
@@ -102,16 +119,7 @@ function genSourceMap (filename, source, compiled, options) {
       }
     }
 
-    if (!filesMatched[fname]) {
-      // new include file - add to sourcemap
-      filesMatched[fname] = true
-
-      if (!opts.excludeContent) {
-        addSourceContent(generator, fname, debugSources)
-      }
-    }
-
-    // already matched?
+    // have a recognized generated line?
     if (!/^;pug_debug/.test(compiledLines[lineno + 1])) {
       var generatedLine = lineCount + 1
 
@@ -122,18 +130,21 @@ function genSourceMap (filename, source, compiled, options) {
         lastLine++
       }
 
-      // adds the new mapping now
-      generator.addMapping({
-        generated: {
-          line: generatedLine,
-          column: 0
-        },
-        source: fname,
-        original: {
-          line: originalLine,
-          column: 0
-        }
-      })
+      // adds the new mapping if line is not matched yet
+      if (matchedLines.indexOf(originalLine) < 0) {
+        matchedLines.push(originalLine)
+        mapGenerator.addMapping({
+          generated: {
+            line: generatedLine,
+            column: 0
+          },
+          original: {
+            line: originalLine,
+            column: 0
+          },
+          source: relative(basedir, fname)
+        })
+      }
     }
   })
 
@@ -152,7 +163,7 @@ function genSourceMap (filename, source, compiled, options) {
     compiled = compiledLines.filter((line) => line !== '\0').join('\n')
   }
 
-  return { data: compiled, map: generator.toString() }
+  return { data: compiled, map: mapGenerator.toJSON() }
 }
 
-module.exports = genSourceMap
+module.exports = genPugSourceMap

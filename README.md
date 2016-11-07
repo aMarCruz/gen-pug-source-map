@@ -9,10 +9,9 @@ Source map v3 generation for [Pug](https://pugjs.org) v2.x (aka Jade).
 
 Designed as a node.js helper for [Brunch](http://brunch.io/) and [Rollup](http://rollupjs.org/) plugins in my current projects, I hope it will be useful to you.
 
-
 **IMPORTANT:**
 
-v0.1.1 is a complete rewrite, please see [What's New](#whats-new)
+v0.1.2 returns a raw source map, this is a breaking change, please see [What's New](#whats-new).
 
 
 ## Install
@@ -36,7 +35,7 @@ From v0.1.1 `source` is deprecated, as the sources are readed from the compiled 
 
 Compile the .pug with `compileDebug:true` and pass the filename, generated code, and options to the source map generator.
 
-It returns a plain JavaScript object with `{data, map}`, where `data` is the generated code and `map` is a JSON string representation of the source map.
+It returns a plain JavaScript object with `{data, map}`, where `data` is the generated code and `map` is an object containing a raw source map.
 
 By default, the generator uses file names relative to the current directory, removes the inlined templates and lines with debugging information, and inserts the templates in the source map (useful for remote debugging), but you can change this behavior with this options:
 
@@ -70,11 +69,17 @@ function compile (filename, source, options) {
 
 The signature of v0.1.0 `(filename, source, compiled [, options])` is supported, but the `source` parameter is deprecated and will be removed in v0.2.x
 
+
+## Known Issues
+
+The generated map does not allow to set breakpoint on `insert` directives nor in the first line of inserted files.
+
+
 ## What's New
 
-The new property `basedir` allows to define the root directory of the source files, for insertion as relative names in the property `sources` of the source map. It defaults to the current directory.
+From v0.1.2 the returned object contains a raw source map in its `map` property, instead the JSON string of previous versions.
 
-Now the source templates are extracted from the compiled code, you don't need to pass this parameter.
+This allows you to manipulate the map without unnecessary conversions and serialize it only if needed.
 
 See the [CHANGELOG](https://github.com/aMarCruz/gen-pug-source-map/blob/master/CHANGELOG.md) for more changes.
 

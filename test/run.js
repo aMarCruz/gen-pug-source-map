@@ -35,21 +35,21 @@ function test2 () {
   })
 
   fs.writeFileSync('output/app1-source.js', code, 'utf8')
-
-  const packet = genSourceMap(file, null, code)
+  const packet = genSourceMap(file, code)
 
   assert(typeof packet.data == 'string')
-  assert(typeof packet.map  == 'string')
+  assert(typeof packet.map  == 'object')
+  const result = packet.map
 
-  const map1 = require('./expected.json')
-  const map2 = JSON.parse(packet.map)
-  const errs = []
+  // if you change the source please test the map and uncomment this once
+  //fs.writeFileSync('./expected.json', JSON.stringify(result, null, 2), 'utf8')
+  const expected = require('./expected.json')
 
-  Object.keys(map1).forEach(function (k) {
-    assert(String(map1[k]) === String(map2[k]),
+  Object.keys(expected).forEach(function (k) {
+    assert(String(expected[k]) === String(result[k]),
       'source map mismatch in property "' + k + '"\n' +
-      'expected "' + map2[k] + '"\n' +
-      '   to be "' + map1[k] + '"\n'
+      'expected "' + result[k] + '"\n' +
+      '   to be "' + expected[k] + '"\n'
     )
   })
 
@@ -59,7 +59,7 @@ function test2 () {
       '\n//# sourceMappingURL=app1.js.map\n'
 
   fs.writeFileSync('output/app1.js', output, 'utf8')
-  fs.writeFileSync('output/app1.js.map', packet.map, 'utf8')
+  fs.writeFileSync('output/app1.js.map', JSON.stringify(packet.map), 'utf8')
 
   const fn = require('./output/app1.js')
   const html = fn(
