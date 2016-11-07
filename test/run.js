@@ -53,7 +53,7 @@ function test2 () {
       console.error(JSON.stringify(result, null, 2))
       console.error('---')
     }
-    assert(!isok,
+    assert(isok,
       'source map mismatch in property "' + k + '"\n' +
       'expected "' + result[k] + '"\n' +
       '   to be "' + expected[k] + '"\n'
