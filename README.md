@@ -1,9 +1,9 @@
+# gen-pug-source-map
+
 [![Windows build][w-build-image]][w-build-url]
 [![Build status][build-image]][build-url]
 [![npm version][npm-image]][npm-url]
 [![License][license-image]][license-url]
-
-# gen-pug-source-map
 
 Source map v3 generation for [Pug](https://pugjs.org) v2.x (aka Jade).
 

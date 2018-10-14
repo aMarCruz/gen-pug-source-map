@@ -1,6 +1,6 @@
 # Changes for gen-pug-source-map
 
-### [1.0.0] - 2018-10-13
+### [1.0.0] - 2018-10-14
 
 ### Changed
 - Using ES6
