@@ -1,12 +1,23 @@
 # Changes for gen-pug-source-map
 
-### 2016-11-06 v0.1.2
+### [1.0.0] - 2018-10-13
+
+### Changed
+- Using ES6
+
+### Removed
+- Remove the second parameter (the source code) from the main function.
+
+### Updated
+- Update test and devDependencies
+
+## [0.1.2] - 2016-11-06
 
 - The returned object contains a raw source map in its `map` property, instead the JSON string of previous versions.
 - Now, the generator raises an exception if the input does not contains debug information.
 - First attempt to support the entry point of the template, information not provided by the pug compiler.
 
-### 2016-10-32 v0.1.0
+## [0.1.0] - 2016-10-32
 
 Complete rewrite, many fixes, almost ready for production
 
@@ -17,6 +28,6 @@ Complete rewrite, many fixes, almost ready for production
 - Better code cleanup, removal of empty lines.
 - Basic but complete test.
 
-### 2016-10-32 v0.1.0
+## [0.1.0] - 2016-10-32
 
 Initial release

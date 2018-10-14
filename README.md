@@ -9,10 +9,6 @@ Source map v3 generation for [Pug](https://pugjs.org) v2.x (aka Jade).
 
 Designed as a node.js helper for [Brunch](http://brunch.io/) and [Rollup](http://rollupjs.org/) plugins in my current projects, I hope it will be useful to you.
 
-**IMPORTANT:**
-
-v0.1.2 returns a raw source map, this is a breaking change, please see [What's New](#whats-new).
-
 
 ## Install
 
@@ -23,29 +19,27 @@ npm install gen-pug-source-map --save
 ## Syntax
 
 ```js
-genPugSourceMap( compiledFileName [, source], compiled [, options] ) -> { data, map }
+genPugSourceMap( compiledFileName, compiledTemplate [, options] ) -> { data, map }
 ```
 
 Mustly, `compiledFileName` will be the name of the root .pug template (the generator adds `.js` to this) and `options` will contain `basedir` with the same value that you pass to the compiler.
-
-From v0.1.1 `source` is deprecated, as the sources are readed from the compiled code.
 
 
 ## Usage
 
 Compile the .pug with `compileDebug:true` and pass the filename, generated code, and options to the source map generator.
 
-It returns a plain JavaScript object with `{data, map}`, where `data` is the generated code and `map` is an object containing a raw source map.
+It returns a plain JavaScript object with `{data, map}` properties, where `data` is the generated code and `map` is an object containing a raw source map.
 
 By default, the generator uses file names relative to the current directory, removes the inlined templates and lines with debugging information, and inserts the templates in the source map (useful for remote debugging), but you can change this behavior with this options:
 
-* `basedir` - Allows to define the root directory of the source files for using relative names.
-* `keepDebugLines` - Keep the lines with debugging information from the generated code.
-* `excludeContent` - Does not include the original source(s) in the source map.
+* `basedir` - Define the root directory of the source files with relative names.
+* `keepDebugLines` - Keep the lines with debugging information in the generated code.
+* `excludeContent` - Does not include the original source(s) in the resulting source map.
 
-If `basedir` is missing or empty, defaults to the current directory.
+If `basedir` is missing or empty, it defaults to the current directory.
 
-Inlined templates and debugging information are used by the pug runtime to display errors, something useful in development mode. For production, better use the defaults as the size of the generated code is about 4x with this info.
+Inlined templates and debugging information are used by the pug runtime to display errors, something useful in development mode. For production, better use the default `keepDebugLines:false` as the size of the generated code is about 4x with debugging info.
 
 ## Example
 
@@ -54,9 +48,9 @@ const genPugSourceMap = require('gen-pug-source-map')
 const pug = require('pug')
 
 function compile (filename, source, options) {
-  options.filename = filename
-  options.compileDebug = true             // REQUIRED!
-  options.inlineRuntimeFunctions = false  // recommended, use global `pug` runtime
+  options.filename = filename             // REQUIRED
+  options.compileDebug = true             // REQUIRED
+  options.inlineRuntimeFunctions = false  // recommended, use the global `pug` runtime
 
   const output = pug.compileClient(source, options)
   const result = genPugSourceMap(filename, output.body, { basedir: options.basedir })
@@ -77,11 +71,7 @@ The generated map does not allow to set breakpoint on `insert` directives nor in
 
 ## What's New
 
-From v0.1.2 the returned object contains a raw source map in its `map` property, instead the JSON string of previous versions.
-
-This allows you to manipulate the map without unnecessary conversions and serialize it only if needed.
-
-See the [CHANGELOG](https://github.com/aMarCruz/gen-pug-source-map/blob/master/CHANGELOG.md) for more changes.
+See changes in the [CHANGELOG](https://github.com/aMarCruz/gen-pug-source-map/blob/master/CHANGELOG.md).
 
 [npm-image]:      https://img.shields.io/npm/v/gen-pug-source-map.svg
 [npm-url]:        https://www.npmjs.com/package/gen-pug-source-map

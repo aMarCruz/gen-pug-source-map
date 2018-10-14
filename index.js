@@ -1,24 +1,25 @@
 'use strict'
 
-var SourceMapGenerator = require('source-map').SourceMapGenerator
-var path = require('path')
+const SourceMapGenerator = require('source-map').SourceMapGenerator
+const path = require('path')
 
-function relative (basedir, fname) {
-  return path.relative(basedir, fname).replace(/\\/g, '/')
-}
+const relative = (basedir, fname) => path.relative(basedir, fname).replace(/\\/g, '/')
 
-/*
-  Pug give us the sources in `var pug_debug_sources = { ... };\n`
-*/
-function extractSources (compiledLines) {
-  var debugSrc = 'var pug_debug_sources = {'
-  var sources  = false
+/**
+ * Extract the source templates from the given lines.
+ */
+const extractSources = (compiledLines) => {
+  // Pug give us the sources in `var pug_debug_sources = { ... };\n`
+  const debugSrc = 'var pug_debug_sources = {'
+  let sources = false
 
-  for (var ix = 0; ix < compiledLines.length; ix++) {
-    var line = compiledLines[ix]
-    if (line.slice(-2) !== '};') continue
+  for (let ix = 0; ix < compiledLines.length; ix++) {
+    const line = compiledLines[ix]
+    if (line.slice(-2) !== '};') {
+      continue
+    }
 
-    var pos = line.indexOf(debugSrc)
+    let pos = line.indexOf(debugSrc)
     if (~pos) {
       pos += debugSrc.length
       try {
@@ -36,46 +37,37 @@ function extractSources (compiledLines) {
   return sources
 }
 
-/*
-  Adds the given filename to sourcesContent, as relative to basedir
-*/
-function addSourceContent (generator, basedir, fname, debugSources) {
-  var source = debugSources[fname]
+/**
+ * Adds the given filename to sourcesContent, as relative to basedir
+ */
+const addSourceContent = (generator, basedir, fname, debugSources) => {
+  const source = debugSources[fname]
   generator.setSourceContent(relative(basedir, fname), source || null)
 }
 
-/*
-  Generates the pair code / sourcemap
-*/
-function genPugSourceMap (filename, source, compiled, options) {
+/**
+ * Generates the pair code / sourcemap
+ */
+function genPugSourceMap (filename, compiled, options) {
+  options = options || {}
 
-  if (arguments.length < 3) {
-    compiled = source
-  } else if (arguments.length < 4 && compiled && typeof compiled == 'object') {
-    options  = compiled
-    compiled = source
-  }
-
-  var opts = options || {}
-  var basedir = opts.root
-
-  basedir  = basedir ? path.resolve(path.normalize(basedir)) : process.cwd()
+  const basedir = options.root ? path.resolve(path.normalize(options.root)) : process.cwd()
   filename = path.resolve(basedir, path.normalize(filename))
 
-  var reLineAndPath = /;pug_debug_line = ([0-9]+);pug_debug_filename = "([^"]*)";/
-  var reEntryPoint  = /^function [$\w]+\(locals\)\{var pug_html\s*=/
-  var compiledLines = compiled.split('\n')
-  var debugSources  = extractSources(compiledLines)
-  var matchedFiles  = {}
-  var lineCount = 0
-  var lastLine = -1
+  const reLineAndPath = /;pug_debug_line = ([0-9]+);pug_debug_filename = "([^"]*)";/
+  const reEntryPoint  = /^function [$\w]+\(locals\)\{var pug_html\s*=/
+  const compiledLines = compiled.split('\n')
+  const debugSources  = extractSources(compiledLines)
+  const matchedFiles  = {}
+  let lineCount = 0
+  let lastLine = -1
 
   if (!debugSources) {
     throw new Error('Cannot get the source code. Please compile with compileDebug:true.')
   }
 
-  var mapGenerator = new SourceMapGenerator({
-    file: relative(basedir, filename) + '.js'
+  const mapGenerator = new SourceMapGenerator({
+    file: relative(basedir, filename) + '.js',
   })
 
   // allow breakpoints in 1st line, better support is in To Do
@@ -83,39 +75,42 @@ function genPugSourceMap (filename, source, compiled, options) {
     mapGenerator.addMapping({
       generated: { line: 1, column: 0 },
       original: { line: 1, column: 0 },
-      source: relative(basedir, filename)
+      source: relative(basedir, filename),
     })
   }
 
-  compiledLines.forEach(function (line, lineno) {
+  compiledLines.forEach((line, lineno) => {
     lineCount++
 
-    var match = line.match(reLineAndPath)
-    if (!match) return
+    const match = line.match(reLineAndPath)
+    if (!match) {
+      return
+    }
 
-    var originalLine = ~~match[1]
-    if (originalLine <= 0) return
+    const originalLine = ~~match[1]
+    if (originalLine <= 0) {
+      return
+    }
 
     // avoid normalize the path here to match the name in debugSources
-    var fname = match[2] && match[2].replace(/\\u002F/g, '/').replace(/\\\\/g, '\\')
-    if (!fname) fname = filename
+    const fname = match[2] && match[2].replace(/\\u002F/g, '/').replace(/\\\\/g, '\\') || filename
 
-    var matchedLines = matchedFiles[fname]
+    let matchedLines = matchedFiles[fname]
     if (!matchedLines) {
-      // new include file - add source content
+      // new included file - add source content
       matchedFiles[fname] = matchedLines = []
 
-      if (!opts.excludeContent) {
+      if (!options.excludeContent) {
         addSourceContent(mapGenerator, basedir, fname, debugSources)
       }
     }
 
     // remove pug debug line from generated code, adjust line counter
-    if (!opts.keepDebugLines) {
-      var len = match[0].length
+    if (!options.keepDebugLines) {
+      const len = match[0].length
 
-      compiledLines[lineno] = line.length === len ? ''
-                            : line.slice(0, match.index) + line.slice(match.index + len)
+      compiledLines[lineno] = line.length === len
+        ? '' : line.slice(0, match.index) + line.slice(match.index + len)
       if (!compiledLines[lineno].trim()) {
         compiledLines[lineno] = '\0'
         lineCount--
@@ -124,7 +119,7 @@ function genPugSourceMap (filename, source, compiled, options) {
 
     // have a recognized generated line?
     if (!/^;pug_debug/.test(compiledLines[lineno + 1])) {
-      var generatedLine = lineCount + 1
+      let generatedLine = lineCount + 1
 
       lastLine = lineno + 1
       if (compiledLines[lastLine].slice(0, 2) === '//' &&
@@ -139,25 +134,25 @@ function genPugSourceMap (filename, source, compiled, options) {
         mapGenerator.addMapping({
           generated: {
             line: generatedLine,
-            column: 0
+            column: 0,
           },
           original: {
             line: originalLine,
-            column: 0
+            column: 0,
           },
-          source: relative(basedir, fname)
+          source: relative(basedir, fname),
         })
       }
     }
   })
 
   // use the resulting non-empty lines to recreate the code
-  if (!opts.keepDebugLines) {
+  if (!options.keepDebugLines) {
 
     // split the last row having the root catch clause
     if (~lastLine) {
-      var line = compiledLines[lastLine]
-      var pos = line.lastIndexOf(';}.call(this,') + 1
+      const line = compiledLines[lastLine]
+      const pos = line.lastIndexOf(';}.call(this,') + 1
       if (pos && line.lastIndexOf('rethrow(err,') > pos) {
         compiledLines[lastLine] = line.slice(0, pos) + '\n' + line.slice(pos)
       }

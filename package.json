@@ -1,13 +1,13 @@
 {
   "name": "gen-pug-source-map",
-  "version": "v0.1.2",
+  "version": "v1.0.0-rc.2",
   "description": "Source map generation for Pug v2.x (aka Jade)",
   "main": "index.js",
   "scripts": {
     "test": "node test/run.js"
   },
   "engines": {
-    "node": ">=0.12"
+    "node": ">=4.2"
   },
   "keywords": [
     "source map",
@@ -22,14 +22,13 @@
   },
   "author": "aMarCruz <amarcruzbox-git@yahoo.com>",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/aMarCruz/gen-pug-source-map/issues"
-  },
+  "bugs": "https://github.com/aMarCruz/gen-pug-source-map/issues",
   "homepage": "https://github.com/aMarCruz/gen-pug-source-map",
   "dependencies": {
-    "source-map": "^0.5.6"
+    "source-map": "^0.7.3"
   },
   "devDependencies": {
-    "pug": "^2.0.0-beta6"
+    "eslint": "^5.6.0",
+    "pug": "^2.0.0"
   }
 }

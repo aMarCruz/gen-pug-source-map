@@ -40,6 +40,7 @@ jspm_packages
 .vscode
 jsconfig.json
 
-# map and test files
+# app files
 dist/*.map
 test/output
+yarn.lock
