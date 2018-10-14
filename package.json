@@ -1,13 +1,13 @@
 {
   "name": "gen-pug-source-map",
-  "version": "v1.0.0-rc.2",
+  "version": "v1.0.0",
   "description": "Source map generation for Pug v2.x (aka Jade)",
   "main": "index.js",
   "scripts": {
     "test": "node test/run.js"
   },
   "engines": {
-    "node": ">=4.2"
+    "node": ">=6.0"
   },
   "keywords": [
     "source map",

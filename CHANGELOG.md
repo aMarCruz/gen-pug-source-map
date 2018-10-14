@@ -4,6 +4,7 @@
 
 ### Changed
 - Using ES6
+- The minimum required version of node.js is 6.0
 
 ### Removed
 - Remove the second parameter (the source code) from the main function.
